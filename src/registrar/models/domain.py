@@ -720,8 +720,14 @@ class Domain(TimeStampedModel, DomainHelper):
                 logger.info("nameserver setter checked for dns_needed state and it did not succeed. Warning: %s" % err)
         elif successTotalNameservers >= 2 and successTotalNameservers <= 13:
             try:
-                self.ready()
-                self.save()
+                # Edge case: if the state is unknown at this point
+                # (which should otherwise not be possible)
+                # see if we can fix this
+                if self.state == self.State.UNKNOWN:
+                    self._fix_unknown_state()
+                else:
+                    self.ready()
+                    self.save()
             except Exception as err:
                 logger.info("nameserver setter checked for create state and it did not succeed. Warning: %s" % err)
 
