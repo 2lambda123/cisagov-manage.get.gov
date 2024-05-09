@@ -541,7 +541,7 @@ class MyUserAdmin(BaseUserAdmin):
             None,
             {"fields": ("username", "password", "status", "verification_type")},
         ),
-        ("Personal Info", {"fields": ("first_name", "last_name", "email")}),
+        ("Personal Info", {"fields": ("first_name", "last_name", "email", "all_emails")}),
         (
             "Permissions",
             {

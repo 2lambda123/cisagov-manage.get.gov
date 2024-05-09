@@ -85,6 +85,7 @@ class User(AbstractUser):
         base_field=models.CharField(max_length=300),
         default=list,
         null=True,
+        blank=True,
     )
 
     def __str__(self):
