@@ -204,6 +204,7 @@ class UserFixture:
                 user.is_superuser = are_superusers
                 user.first_name = user_data["first_name"]
                 user.last_name = user_data["last_name"]
+                # LOOK HERE
                 if "email" in user_data:
                     user.email = user_data["email"]
                 user.is_staff = True

@@ -534,6 +534,7 @@ class MyUserAdmin(BaseUserAdmin):
     # Renames inherited AbstractUser column name 'email_address to 'email'
     @admin.display(description=_("Email"))
     def overridden_email_field(self, obj):
+        # LOOK HERE
         return obj.email
 
     fieldsets = (
@@ -754,6 +755,7 @@ class ContactAdmin(ListHeaderAdmin):
         if obj.first_name or obj.last_name:
             return obj.get_formatted_name()
         elif obj.email:
+            # LOOK HERE
             return obj.email
         elif obj.pk:
             return str(obj.pk)

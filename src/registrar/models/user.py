@@ -93,6 +93,7 @@ class User(AbstractUser):
         if self.first_name or self.last_name:
             return f"{self.first_name or ''} {self.last_name or ''} {self.email or ''}"
         elif self.email:
+            # LOOK HERE
             return self.email
         else:
             return self.username
@@ -133,6 +134,7 @@ class User(AbstractUser):
         return self.domain_requests_created.filter(status=DomainRequest.DomainRequestStatus.INELIGIBLE).count()
 
     def has_contact_info(self):
+        # LOOK HERE
         return bool(self.contact.title or self.contact.email or self.contact.phone)
 
     @classmethod
@@ -166,6 +168,7 @@ class User(AbstractUser):
         Given pre-existing data from TransitionDomain, VerifiedByStaff, and DomainInvitation,
         set the verification "type" defined in VerificationTypeChoices.
         """
+        # LOOK HERE
         email_or_username = self.email if self.email else self.username
         retrieved = DomainInvitation.DomainInvitationStatus.RETRIEVED
         verification_type = self.get_verification_type_from_email(email_or_username, invitation_status=retrieved)
@@ -211,6 +214,7 @@ class User(AbstractUser):
     def check_domain_invitations_on_login(self):
         """When a user first arrives on the site, we need to retrieve any domain
         invitations that match their email address."""
+        # LOOK HERE
         for invitation in DomainInvitation.objects.filter(
             email__iexact=self.email, status=DomainInvitation.DomainInvitationStatus.INVITED
         ):

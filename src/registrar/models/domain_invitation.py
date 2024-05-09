@@ -19,7 +19,7 @@ class DomainInvitation(TimeStampedModel):
     class DomainInvitationStatus(models.TextChoices):
         INVITED = "invited", "Invited"
         RETRIEVED = "retrieved", "Retrieved"
-
+    # LOOK HERE
     email = models.EmailField(
         null=False,
         blank=False,
@@ -41,6 +41,7 @@ class DomainInvitation(TimeStampedModel):
     def __str__(self):
         return f"Invitation for {self.email} on {self.domain} is {self.status}"
 
+    # LOOK HERE
     @transition(field="status", source=DomainInvitationStatus.INVITED, target=DomainInvitationStatus.RETRIEVED)
     def retrieve(self):
         """When an invitation is retrieved, create the corresponding permission.

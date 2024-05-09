@@ -36,6 +36,7 @@ class Contact(TimeStampedModel):
         blank=True,
         verbose_name="title / role",
     )
+    # LOOK HERE
     email = models.EmailField(
         null=True,
         blank=True,

@@ -600,6 +600,7 @@ class DomainRequest(TimeStampedModel):
             return None
 
         try:
+            # LOOK HERE
             send_templated_email(
                 email_template,
                 email_template_subject,

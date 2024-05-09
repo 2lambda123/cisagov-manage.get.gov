@@ -7,7 +7,7 @@ from django import forms
 
 from registrar.models import DomainRequest, Contact
 
-
+# LOOK HERE
 class RegistrarForm(forms.Form):
     """
     A common set of methods and configuration.

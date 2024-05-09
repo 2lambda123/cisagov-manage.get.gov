@@ -891,7 +891,7 @@ class Domain(TimeStampedModel, DomainHelper):
             # if already exists just update
             elif alreadyExistsInRegistry:
                 current_contact = PublicContact.objects.filter(registry_id=contact.registry_id).get()
-
+                # LOOK HERE
                 if current_contact.email != contact.email:
                     self._update_epp_contact(contact=contact)
         else:
@@ -900,6 +900,7 @@ class Domain(TimeStampedModel, DomainHelper):
             # get the current contact registry id for security
             current_contact = PublicContact.objects.filter(registry_id=contact.registry_id).get()
 
+            # LOOK HERE
             # don't let user delete the default without adding a new email
             if current_contact.email != PublicContact.get_default_security().email:
                 # remove the contact
@@ -1480,6 +1481,7 @@ class Domain(TimeStampedModel, DomainHelper):
         DF = epp.DiscloseField
         fields = {DF.EMAIL}
 
+        # LOOK HERE
         hidden_security_emails = [DefaultEmail.PUBLIC_CONTACT_DEFAULT.value, DefaultEmail.LEGACY_DEFAULT.value]
         disclose = is_security and contact.email not in hidden_security_emails
         # Delete after testing on other devices
