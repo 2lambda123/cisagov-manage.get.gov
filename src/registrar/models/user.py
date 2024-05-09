@@ -13,6 +13,7 @@ from .domain import Domain
 from .domain_request import DomainRequest
 
 from phonenumber_field.modelfields import PhoneNumberField  # type: ignore
+from django.contrib.postgres.fields import ArrayField
 
 
 logger = logging.getLogger(__name__)
@@ -78,6 +79,12 @@ class User(AbstractUser):
         null=True,
         blank=True,
         help_text="The means through which this user was verified",
+    )
+
+    all_emails = ArrayField(
+        base_field=models.CharField(max_length=300),
+        default=list,
+        null=True,
     )
 
     def __str__(self):
