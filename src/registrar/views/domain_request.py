@@ -16,6 +16,8 @@ from registrar.utility import StrEnum
 from registrar.views.utility import StepsHelper
 from registrar.views.utility.permission_views import DomainRequestPermissionDeleteView
 
+from waffle.decorators import flag_is_active
+
 from .utility import (
     DomainRequestPermissionView,
     DomainRequestPermissionWithdrawView,
@@ -227,7 +229,9 @@ class DomainRequestWizard(DomainRequestWizardPermissionView, TemplateView):
         #     know which view is first in the list of steps.
         if self.__class__ == DomainRequestWizard:
             if request.path_info == self.NEW_URL_NAME:
-                return render(request, "domain_request_intro.html")
+                context = self.get_context_data()
+                logger.debug("CONTEXT profile flag is %s" % context["has_profile_feature_flag"])
+                return render(request, "domain_request_intro.html", context=context)
             else:
                 return self.goto(self.steps.first)
 
@@ -384,7 +388,10 @@ class DomainRequestWizard(DomainRequestWizardPermissionView, TemplateView):
         else:
             modal_heading = "You are about to submit an incomplete request"
 
-        return {
+        has_profile_flag = flag_is_active(self.request, "profile_feature")
+        logger.debug("PROFILE FLAG is %s" % has_profile_flag)
+
+        context = {
             "form_titles": self.TITLES,
             "steps": self.steps,
             # Add information about which steps should be unlocked
@@ -392,7 +399,11 @@ class DomainRequestWizard(DomainRequestWizardPermissionView, TemplateView):
             "is_federal": self.domain_request.is_federal(),
             "modal_button": modal_button,
             "modal_heading": modal_heading,
+            # Use the profile waffle feature flag to toggle profile features throughout domain requests
+            "has_profile_feature_flag": has_profile_flag,
+            "user": self.request.user,
         }
+        return context
 
     def get_step_list(self) -> list:
         """Dynamically generated list of steps in the form wizard."""
