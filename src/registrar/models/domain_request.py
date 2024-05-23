@@ -457,11 +457,13 @@ class DomainRequest(TimeStampedModel):
         help_text="Determines if the user has a anything_else or not",
     )
 
-    cisa_representative_email = models.EmailField(
+    cisa_representative = models.ForeignKey(
+        "registrar.Contact",
         null=True,
         blank=True,
-        verbose_name="CISA regional representative",
-        max_length=320,
+        related_name="cisa_representative_domain_requests",
+        on_delete=models.PROTECT,
+        help_text='Cisa Representative listed under "additional information" in the request form',
     )
 
     # This is a drop-in replacement for an has_cisa_representative() function.
@@ -534,15 +536,17 @@ class DomainRequest(TimeStampedModel):
         We handle that here for def save().
         """
 
+        cisa_rep_is_not_none = self.cisa_representative is not None
+        cisa_first_name = None
+
         # This ensures that if we have prefilled data, the form is prepopulated
-        if self.cisa_representative_email is not None:
-            self.has_cisa_representative = self.cisa_representative_email != ""
+        if cisa_rep_is_not_none:
+            cisa_first_name = self.cisa_representative.first_name
+            self.has_cisa_representative = cisa_first_name is not None and cisa_first_name != ""
 
         # This check is required to ensure that the form doesn't start out checked
         if self.has_cisa_representative is not None:
-            self.has_cisa_representative = (
-                self.cisa_representative_email != "" and self.cisa_representative_email is not None
-            )
+            self.has_cisa_representative = cisa_first_name is not None and cisa_first_name != ""
 
         # This ensures that if we have prefilled data, the form is prepopulated
         if self.anything_else is not None:

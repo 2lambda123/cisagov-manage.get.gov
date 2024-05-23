@@ -647,20 +647,54 @@ class NoOtherContactsForm(BaseDeletableRegistrarForm):
 
 
 class CisaRepresentativeForm(BaseDeletableRegistrarForm):
-    cisa_representative_email = forms.EmailField(
-        required=True,
+    JOIN = "cisa_representative"
+
+    def to_database(self, obj):
+        if not self.is_valid():
+            return
+        contact = getattr(obj, "cisa_representative", None)
+        if contact is not None and not contact.has_more_than_one_join("cisa_representative_domain_requests"):
+            if self.form_data_marked_for_deletion:
+                # remove the CISA contact from this domain request
+                obj.cisa_representative = None
+                # QUESTION - should we also delete the contact object if it is not joined to other entities?
+            else:
+                # update existing contact if it is not joined to other enttities
+                super().to_database(contact)
+        else:
+            # no contact exists OR contact exists which is joined also to other entities;
+            # in either case, create a new contact and update it
+            contact = Contact()
+            super().to_database(contact)
+            obj.cisa_representative = contact
+            obj.save()
+
+    @classmethod
+    def from_database(cls, obj):
+        contact = getattr(obj, "cisa_representative", None)
+        return super().from_database(contact)
+
+    first_name = forms.CharField(
+        label="First name / given name",
+        error_messages={"required": "Enter your first name / given name."},
+    )
+    last_name = forms.CharField(
+        label="Last name / family name",
+        error_messages={"required": "Enter your last name / family name."},
+    )
+    email = forms.EmailField(
+        label="Email",
         max_length=None,
-        label="Your representative’s email",
+        required=False,
+        error_messages={
+            "invalid": ("Enter your email address in the required format, like name@example.com."),
+        },
         validators=[
             MaxLengthValidator(
                 320,
                 message="Response must be less than 320 characters.",
             )
         ],
-        error_messages={
-            "invalid": ("Enter your email address in the required format, like name@example.com."),
-            "required": ("Enter the email address of your CISA regional representative."),
-        },
     )
 
 
