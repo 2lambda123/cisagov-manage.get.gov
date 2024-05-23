@@ -15,12 +15,14 @@ from registrar.models.user import User
 from registrar.utility import StrEnum
 from registrar.views.utility import StepsHelper
 from registrar.views.utility.permission_views import DomainRequestPermissionDeleteView
+from waffle.decorators import flag_is_active, waffle_flag
 
 from .utility import (
     DomainRequestPermissionView,
     DomainRequestPermissionWithdrawView,
     DomainRequestWizardPermissionView,
 )
+
 
 logger = logging.getLogger(__name__)
 
@@ -225,14 +227,14 @@ class DomainRequestWizard(DomainRequestWizardPermissionView, TemplateView):
         #     will NOT be redirected. The purpose of this is to allow code to
         #     send users "to the domain request wizard" without needing to
         #     know which view is first in the list of steps.
+        context = self.get_context_data()
         if self.__class__ == DomainRequestWizard:
             if request.path_info == self.NEW_URL_NAME:
-                return render(request, "domain_request_intro.html")
+                return render(request, "domain_request_intro.html", context)
             else:
                 return self.goto(self.steps.first)
 
         self.steps.current = current_url
-        context = self.get_context_data()
         context["forms"] = self.get_forms()
 
         # if pending requests exist and user does not have approved domains,
@@ -392,12 +394,19 @@ class DomainRequestWizard(DomainRequestWizardPermissionView, TemplateView):
             "is_federal": self.domain_request.is_federal(),
             "modal_button": modal_button,
             "modal_heading": modal_heading,
+            "has_profile_feature_flag": flag_is_active(self.request, "profile_feature"),
         }
 
     def get_step_list(self) -> list:
         """Dynamically generated list of steps in the form wizard."""
         step_list = []
+        excluded_steps = [Step.YOUR_CONTACT]
+        should_exclude = flag_is_active(self.request, "profile_feature")
         for step in Step:
+
+            if should_exclude and step in excluded_steps:
+                continue
+
             condition = self.WIZARD_CONDITIONS.get(step, True)
             if callable(condition):
                 condition = condition(self)
@@ -536,6 +545,10 @@ class Purpose(DomainRequestWizard):
 class YourContact(DomainRequestWizard):
     template_name = "domain_request_your_contact.html"
     forms = [forms.YourContactForm]
+
+    @waffle_flag("!profile_feature")  # type: ignore
+    def dispatch(self, request, *args, **kwargs):  # type: ignore
+        return super().dispatch(request, *args, **kwargs)
 
 
 class OtherContacts(DomainRequestWizard):
@@ -695,6 +708,13 @@ class Finished(DomainRequestWizard):
 class DomainRequestStatus(DomainRequestPermissionView):
     template_name = "domain_request_status.html"
 
+    def get_context_data(self, **kwargs):
+        """Extend get_context_data to add has_profile_feature_flag to context"""
+        context = super().get_context_data(**kwargs)
+        # This is a django waffle flag which toggles features based off of the "flag" table
+        context["has_profile_feature_flag"] = flag_is_active(self.request, "profile_feature")
+        return context
+
 
 class DomainRequestWithdrawConfirmation(DomainRequestPermissionWithdrawView):
     """This page will ask user to confirm if they want to withdraw
@@ -704,6 +724,13 @@ class DomainRequestWithdrawConfirmation(DomainRequestPermissionWithdrawView):
     """
 
     template_name = "domain_request_withdraw_confirmation.html"
+
+    def get_context_data(self, **kwargs):
+        """Extend get_context_data to add has_profile_feature_flag to context"""
+        context = super().get_context_data(**kwargs)
+        # This is a django waffle flag which toggles features based off of the "flag" table
+        context["has_profile_feature_flag"] = flag_is_active(self.request, "profile_feature")
+        return context
 
 
 class DomainRequestWithdrawn(DomainRequestPermissionWithdrawView):
