@@ -14,7 +14,7 @@ DOMAIN_LIST_URL = (
     "https://raw.githubusercontent.com/cisagov/dotgov-data/main/current-full.csv"
 )
 
-data = requests.get(DOMAIN_LIST_URL).content.decode("utf-8")
+data = requests.get(DOMAIN_LIST_URL, timeout=60).content.decode("utf-8")
 csv_data = list(csv.reader(data.splitlines(), delimiter=","))
 domains = csv_data[1:]
 fields = csv_data[0] + ["Response"]

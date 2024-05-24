@@ -20,7 +20,7 @@ GOV_URLS_CSV_URL = (
     "https://raw.githubusercontent.com/GSA/govt-urls/master/1_govt_urls_full.csv"
 )
 
-data = requests.get(GOV_URLS_CSV_URL).text
+data = requests.get(GOV_URLS_CSV_URL, timeout=60).text
 csv_data = list(csv.reader(data.splitlines(), delimiter=","))
 domains = csv_data[1:]
 fields = csv_data[0] + ["Registrar"]
