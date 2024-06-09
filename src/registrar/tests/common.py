@@ -2,7 +2,6 @@ import os
 import logging
 
 from contextlib import contextmanager
-import random
 from string import ascii_uppercase
 import uuid
 from django.test import TestCase
@@ -40,6 +39,7 @@ from epplibwrapper import (
 from registrar.models.user_domain_role import UserDomainRole
 
 from registrar.models.utility.contact_error import ContactError, ContactErrorCodes
+import secrets
 
 logger = logging.getLogger(__name__)
 
@@ -910,7 +910,7 @@ def multiple_unalphabetical_domain_objects(
     """Returns a list of generic domain objects for testing purposes"""
     domain_requests = []
     list_of_letters = list(ascii_uppercase)
-    random.shuffle(list_of_letters)
+    secrets.SystemRandom().shuffle(list_of_letters)
 
     mock = AuditedAdminMockData()
     for object_name in list_of_letters:

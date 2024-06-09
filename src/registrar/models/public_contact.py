@@ -1,5 +1,4 @@
 from datetime import datetime
-from random import choices
 from string import ascii_uppercase, ascii_lowercase, digits
 
 from django.db import models
@@ -7,12 +6,13 @@ from django.db import models
 from registrar.utility.enums import DefaultEmail
 
 from .utility.time_stamped_model import TimeStampedModel
+import secrets
 
 
 def get_id():
     """Generate a 16 character registry ID with a low probability of collision."""
     day = datetime.today().strftime("%A")[:2]
-    rand = "".join(choices(ascii_uppercase + ascii_lowercase + digits, k=14))  # nosec B311
+    rand = "".join(secrets.SystemRandom().choices(ascii_uppercase + ascii_lowercase + digits, k=14))  # nosec B311
     return f"{day}{rand}"
 
 

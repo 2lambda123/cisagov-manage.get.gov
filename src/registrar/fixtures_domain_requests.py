@@ -1,9 +1,9 @@
 import logging
-import random
 from faker import Faker
 from django.db import transaction
 
 from registrar.models import User, DomainRequest, DraftDomain, Contact, Website, FederalAgency
+import secrets
 
 fake = Faker()
 logger = logging.getLogger(__name__)
@@ -99,7 +99,7 @@ class DomainRequestFixture:
         da.federal_type = (
             app["federal_type"]
             if "federal_type" in app
-            else random.choice(["executive", "judicial", "legislative"])  # nosec
+            else secrets.choice(["executive", "judicial", "legislative"])  # nosec
         )
         da.address_line1 = app["address_line1"] if "address_line1" in app else fake.street_address()
         da.address_line2 = app["address_line2"] if "address_line2" in app else None
@@ -140,7 +140,7 @@ class DomainRequestFixture:
             else:
                 federal_agencies = FederalAgency.objects.all()
                 # Random choice of agency for selects, used as placeholders for testing.
-                da.federal_agency = random.choice(federal_agencies)  # nosec
+                da.federal_agency = secrets.choice(federal_agencies)  # nosec
 
     @classmethod
     def _set_many_to_many_relations(cls, da: DomainRequest, app: dict):
@@ -150,7 +150,7 @@ class DomainRequestFixture:
                 da.other_contacts.add(Contact.objects.get_or_create(**contact)[0])
         elif not da.other_contacts.exists():
             other_contacts = [
-                Contact.objects.create(**cls.fake_contact()) for _ in range(random.randint(0, 3))  # nosec
+                Contact.objects.create(**cls.fake_contact()) for _ in range(secrets.SystemRandom().randint(0, 3))  # nosec
             ]
             da.other_contacts.add(*other_contacts)
 
@@ -159,7 +159,7 @@ class DomainRequestFixture:
                 da.current_websites.add(Website.objects.get_or_create(website=website)[0])
         elif not da.current_websites.exists():
             current_websites = [
-                Website.objects.create(website=fake.uri()) for _ in range(random.randint(0, 3))  # nosec
+                Website.objects.create(website=fake.uri()) for _ in range(secrets.SystemRandom().randint(0, 3))  # nosec
             ]
             da.current_websites.add(*current_websites)
 
@@ -168,7 +168,7 @@ class DomainRequestFixture:
                 da.alternative_domains.add(Website.objects.get_or_create(website=domain)[0])
         elif not da.alternative_domains.exists():
             alternative_domains = [
-                Website.objects.create(website=cls.fake_dot_gov()) for _ in range(random.randint(0, 3))  # nosec
+                Website.objects.create(website=cls.fake_dot_gov()) for _ in range(secrets.SystemRandom().randint(0, 3))  # nosec
             ]
             da.alternative_domains.add(*alternative_domains)
 
@@ -237,7 +237,7 @@ class DomainFixture(DomainRequestFixture):
             if domain_request.investigator is None:
                 # All "users" in fixtures have admin perms per prior config.
                 # No need to check for that.
-                domain_request.investigator = random.choice(users)  # nosec
+                domain_request.investigator = secrets.choice(users)  # nosec
 
             domain_request.approve(send_email=False)
             domain_request.save()
